@@ -26,12 +26,21 @@ export const signup = async (request: Request, response: Response, next: NextFun
                 email: user.email,
             }
         });
-    } catch (error) {
+    } catch (error: any) {
         console.error(error)
-        response.status(500).json({
-            success: false,
-            message: "Internal Server Error"
-        });
+        if (error.message?.includes("already exists!")) {
+            response.status(409).json({
+                success: false,
+                message: error.message
+            });
+        }
+        else {
+
+            response.status(500).json({
+                success: false,
+                message: "Internal Server Error"
+            });
+        }
     }
 
 

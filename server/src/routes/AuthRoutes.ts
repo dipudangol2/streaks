@@ -7,6 +7,6 @@ const authRoutes: Router = Router();
 
 
 authRoutes.post("/login", login);
-authRoutes.post("/signup", signup);
+authRoutes.post("/sign-up", signup);
 
 export default authRoutes;

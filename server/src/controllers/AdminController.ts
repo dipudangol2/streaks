@@ -1,6 +1,5 @@
 import { NextFunction, Request, Response } from "express";
 import { getUsers } from "../services/user.service";
-import { count } from "console";
 
 
 export const getAllUsers = async (request: Request, response: Response, next: NextFunction) => {
