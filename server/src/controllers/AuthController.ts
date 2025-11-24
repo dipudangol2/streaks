@@ -57,7 +57,7 @@ export const login = async (request: Request, response: Response, next: NextFunc
         }
         const user = await getUserByEmail(email);
         if (user === null) {
-            response.status(404).json({
+            response.status(401).json({
                 success: false,
                 message: "User not found!"
             });
@@ -65,17 +65,18 @@ export const login = async (request: Request, response: Response, next: NextFunc
         }
         const auth = await comparePasswords(password, user.password);
         if (!auth) {
-            response.status(400).json({
-                success: true,
-                message: "Passwords do not match"
+            response.status(401).json({
+                success: false,
+                message: "Wrong password for the user!"
             });
             return;
         }
 
         response.cookie("jwt", createToken(email, user.id, user.isAdmin), {
             maxAge: MAX_AGE,
-            secure: true,
-            sameSite: "none"
+            secure: process.env.NODE_ENV === "production",
+            sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+            httpOnly: true
         })
 
         response.status(200).json({
