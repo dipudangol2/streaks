@@ -19,7 +19,7 @@ export const createToken = (email: string, userId: string, isAdmin: boolean) => 
         throw new Error("JWT_KEY is not defined in environment variables");
     }
     return jwt.sign({ email, userId, isAdmin }, jwtKey, {
-        expiresIn: MAX_AGE,
+        expiresIn: Math.floor(MAX_AGE / 1000), // jsonwebtoken expects seconds when using a number
     });
 }
 export const isNextDay = (prevDate: Date, currentDate: Date) => {

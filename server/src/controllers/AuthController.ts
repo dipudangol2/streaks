@@ -26,9 +26,9 @@ export const signup = async (request: Request, response: Response, next: NextFun
                 email: user.email,
             }
         });
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error(error)
-        if (error.message?.includes("already exists!")) {
+        if (error instanceof Error && error.message?.includes("already exists!")) {
             response.status(409).json({
                 success: false,
                 message: error.message
@@ -56,10 +56,10 @@ export const login = async (request: Request, response: Response, next: NextFunc
             return;
         }
         const user = await getUserByEmail(email);
-        if (user === null) {
+        if (!user) {
             response.status(401).json({
                 success: false,
-                message: "User not found!"
+                message: "Invalid email or password!"
             });
             return;
         }
@@ -67,7 +67,7 @@ export const login = async (request: Request, response: Response, next: NextFunc
         if (!auth) {
             response.status(401).json({
                 success: false,
-                message: "Wrong password for the user!"
+                message: "Invalid email or password!"
             });
             return;
         }

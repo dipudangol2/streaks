@@ -18,7 +18,7 @@ export const verifyToken = (request: Request, response: Response, next: NextFunc
             response.status(401).json({ message: "User is not Authenticated." });
             return;
         }
-        jwt.verify(token, jwtKey, async (error: jwt.VerifyErrors | null, payload: unknown) => {
+        jwt.verify(token, jwtKey, (error: jwt.VerifyErrors | null, payload: unknown) => {
             if (error) {
                 response.status(403).json({ message: "Invalid Token" });
                 return;
