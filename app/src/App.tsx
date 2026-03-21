@@ -1,17 +1,19 @@
-import { Navigate, Route,BrowserRouter as Router,Routes } from "react-router-dom";
+import { Navigate, Route, BrowserRouter as Router, Routes } from "react-router-dom";
 import Home from "./pages/Home";
-import { Auth } from "./pages/Auth";
+import { Login } from "./pages/Login";
+import { Signup } from "./pages/Signup";
 
 const App = () => {
   return (
-   <Router>
-    <Routes>
-      <Route path="/" element={<Home/>}/>
-      <Route path="/auth" element={<Auth/>}/>
-      <Route path="*" element={<Navigate to="/"/>}/>
-    </Routes>
-   </Router>
-   
+    <Router>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Signup />} />
+        <Route path="*" element={<Navigate to="/" />} />
+      </Routes>
+    </Router>
+
   )
 }
 
