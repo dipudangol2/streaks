@@ -3,7 +3,7 @@ import prisma from "../config/db";
 
 export const isAdmin = async (request: Request, response: Response, next: NextFunction) => {
     try {
-        const isAdmin = (request as any).isAdmin;
+        const isAdmin = request.isAdmin;
         if (!isAdmin) {
             response.status(403).json({
                 success: false,

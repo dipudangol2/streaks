@@ -10,7 +10,7 @@ import { isNextDay } from "../utils/utils";
 export const createHabit = async (request: Request, response: Response, next: NextFunction) => {
     try {
         const { title, description, frequency, startDate }: HabitCreateInput = request.body;
-        const userId: string = (request as any).userId;
+        const userId = request.userId!;
 
         const habit = await habitCreate({
             title,
@@ -39,7 +39,7 @@ export const createHabit = async (request: Request, response: Response, next: Ne
 
 export const getAllHabits = async (request: Request, response: Response, next: NextFunction) => {
     try {
-        const userId: string = (request as any).userId;
+        const userId = request.userId!;
         const userHabits = await fetchAllHabits(userId);
         console.log(userHabits);
         response.status(200).json({
@@ -59,7 +59,7 @@ export const getAllHabits = async (request: Request, response: Response, next: N
 export const updateHabit = async (request: Request, response: Response, next: NextFunction) => {
     try {
         const habitId = request.params.id;
-        const userId = (request as any).userId!;
+        const userId = request.userId!;
         const incomingUpdates: HabitUpdateInput = request.body;
 
         const existingHabit = await prisma.habit.findUnique({
@@ -126,7 +126,7 @@ export const updateHabit = async (request: Request, response: Response, next: Ne
 export const deleteHabit = async (request: Request, response: Response, next: NextFunction) => {
     try {
         const habitId = request.params.id;
-        const userId: string = (request as any).userId;
+        const userId = request.userId!;
         const habit = await prisma.habit.findUnique({
             where: { id: habitId }
         })
@@ -146,6 +146,7 @@ export const deleteHabit = async (request: Request, response: Response, next: Ne
         }
         await prisma.$transaction([
             prisma.habitCheckin.deleteMany({ where: { habitId } }),
+            prisma.streak.deleteMany({ where: { habitId } }),
             prisma.habit.delete({ where: { id: habitId } })
         ]);
 
@@ -176,7 +177,7 @@ export const deleteHabit = async (request: Request, response: Response, next: Ne
 export const getHabit = async (request: Request, response: Response, next: NextFunction) => {
     try {
         const habitId = request.params.id;
-        const userId = (request as any).userId!;
+        const userId = request.userId!;
         const habit = await prisma.habit.findUnique({
             where: {
                 id: habitId,
@@ -298,6 +299,9 @@ export const habitCheckin = async (request: Request, response: Response) => {
 
     } catch (error) {
         console.error(error);
-        response.status(500).json({ error: "Server error" });
+        response.status(500).json({
+            success: false,
+            message: "Internal Server Error"
+        });
     }
 };

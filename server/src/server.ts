@@ -24,6 +24,29 @@ app.use("/api/admin", adminRoutes);
 app.use("/api-docs", swagger)
 
 
+/**
+ * @swagger
+ * /health-check:
+ *   get:
+ *     tags:
+ *       - System
+ *     summary: Health check
+ *     description: Returns a simple string response when API is healthy.
+ *     responses:
+ *       200:
+ *         description: API is healthy
+ *         content:
+ *           text/plain:
+ *             schema:
+ *               type: string
+ *               example: API is running and healthy.
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ */
 app.get("/health-check",
     (request, response, next) => {
         try {
