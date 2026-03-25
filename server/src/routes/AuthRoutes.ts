@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { login, signup } from "../controllers/AuthController";
+import { login, signup, logout } from "../controllers/AuthController";
 
 
 
@@ -101,7 +101,38 @@ const authRoutes: Router = Router();
  *               $ref: '#/components/schemas/ErrorResponse'
  */
 
+/**
+ * @swagger
+ * /api/auth/logout:
+ *   post:
+ *     tags:
+ *       - Auth
+ *     summary: Logout user
+ *     description: Clears the jwt cookie.
+ *     responses:
+ *       200:
+ *         description: Logout successful
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: Logout successful
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ */
+
 authRoutes.post("/login", login);
 authRoutes.post("/sign-up", signup);
+authRoutes.post("/logout", logout);
 
 export default authRoutes;

@@ -95,3 +95,18 @@ export const login = async (request: Request, response: Response, next: NextFunc
     }
 }
 
+export const logout = async (request: Request, response: Response, next: NextFunction) => {
+    try {
+        response.clearCookie("jwt");
+        response.status(200).json({
+            success: true,
+            message: "Logout successful"
+        });
+    } catch (error) {
+        console.error(error)
+        response.status(500).json({
+            success: false,
+            message: "Internal Server Error"
+        });
+    }
+}
