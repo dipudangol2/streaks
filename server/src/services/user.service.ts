@@ -15,3 +15,16 @@ export const getUsers = async () => {
     }
   });
 };
+
+export const deleteUserById = async (id: string) => {
+  return await prisma.user.delete({
+    where: { id }
+  });
+};
+
+export const updateUserRole = async (id: string, isAdmin: boolean) => {
+  return await prisma.user.update({
+    where: { id },
+    data: { isAdmin }
+  });
+};

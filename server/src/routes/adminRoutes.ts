@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { verifyToken } from "../middleware/authMiddleware";
 import { isAdmin } from "../middleware/AdminMiddleware";
-import { getAllUsers } from "../controllers/AdminController";
+import { getAllUsers, deleteUser, updateUserRole } from "../controllers/AdminController";
 
 
 const adminRoutes: Router = Router();
@@ -43,5 +43,7 @@ const adminRoutes: Router = Router();
 
 
 adminRoutes.get("/users", verifyToken, isAdmin, getAllUsers);
+adminRoutes.delete("/users/:id", verifyToken, isAdmin, deleteUser);
+adminRoutes.patch("/users/:id/role", verifyToken, isAdmin, updateUserRole);
 
 export default adminRoutes;
