@@ -1,5 +1,6 @@
 import { Router } from "express";
-import { login, signup, logout } from "../controllers/AuthController";
+import { login, signup, logout, getCurrentUser } from "../controllers/AuthController";
+import { verifyToken } from "../middleware/authMiddleware";
 
 
 
@@ -134,5 +135,6 @@ const authRoutes: Router = Router();
 authRoutes.post("/login", login);
 authRoutes.post("/sign-up", signup);
 authRoutes.post("/logout", logout);
+authRoutes.get("/me", verifyToken, getCurrentUser);
 
 export default authRoutes;

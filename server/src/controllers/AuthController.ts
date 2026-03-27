@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import { createUser, getUserByEmail } from "../models/user.model";
+import { createUser, getUserByEmail, getUserById } from "../models/user.model";
 import { comparePasswords, createToken, hashPassword } from "../utils/utils";
 const MAX_AGE = 3 * 24 * 60 * 60 * 1000;
 
@@ -108,5 +108,34 @@ export const logout = async (request: Request, response: Response, next: NextFun
             success: false,
             message: "Internal Server Error"
         });
+    }
+}
+
+export const getCurrentUser = async (request: Request, response: Response, next: NextFunction) => {
+    try {
+        const userId = request.userId;
+        if (!userId) {
+            response.status(401).json({ success: false, message: "Unauthorized" });
+            return;
+        }
+        
+        const user = await getUserById(userId);
+        if (!user) {
+            response.status(404).json({ success: false, message: "User not found" });
+            return;
+        }
+        
+        response.status(200).json({
+            success: true,
+            user: {
+                userId: user.id,
+                email: user.email,
+                name: user.name,
+                isAdmin: user.isAdmin
+            }
+        });
+    } catch (error) {
+        console.error(error);
+        response.status(500).json({ success: false, message: "Internal Server Error" });
     }
 }
