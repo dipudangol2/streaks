@@ -10,7 +10,7 @@ import swagger from "./swagger/swagger";
 const app: Application = express();
 app.use(
     cors({
-        origin: "http://localhost:5173",
+        origin: "*",
         methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
         credentials: true,
     })
@@ -21,12 +21,12 @@ app.use(express.json());
 app.use("/api/auth", authRoutes);
 app.use("/api/habits", habitRoutes);
 app.use("/api/admin", adminRoutes);
-app.use("/api-docs", swagger)
+app.use("/api/docs", swagger)
 
 
 /**
  * @swagger
- * /health-check:
+ * /api/health-check:
  *   get:
  *     tags:
  *       - System
@@ -47,7 +47,7 @@ app.use("/api-docs", swagger)
  *             schema:
  *               $ref: '#/components/schemas/ErrorResponse'
  */
-app.get("/health-check",
+app.get("/api/health-check",
     (request, response, next) => {
         try {
             response.status(200).send("API is running and healthy.");

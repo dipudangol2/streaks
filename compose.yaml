@@ -1,0 +1,48 @@
+services:
+  db:
+    image: postgres:17-alpine
+    container_name: streaks-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  server:
+    image: localhost/streaks-server:latest
+    container_name: streaks-server
+    restart: unless-stopped
+    build: ./server
+    ports:
+      - "8000:8000"
+    env_file:
+      - ./server/.env
+    depends_on:
+      db:
+        condition: service_healthy
+
+  app:
+    image: localhost/streaks-app:latest
+    container_name: streaks-app
+    restart: unless-stopped
+    build: ./app
+    env_file:
+      - ./app/.env
+    ports:
+      - "3000:80"
+    depends_on:
+      - server
+
+volumes:
+  pgdata:
+
+
