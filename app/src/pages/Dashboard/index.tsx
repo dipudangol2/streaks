@@ -6,12 +6,14 @@ import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { habitService } from "@/services/habit.service";
 import type { Habit } from "@/services/habit.service";
+import Modal from "@/components/common/Modal";
 
 export const Dashboard = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [habits, setHabits] = useState<Habit[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
     const fetchHabits = async () => {
@@ -45,9 +47,14 @@ export const Dashboard = () => {
     }
   };
 
+  const toggleHabitModal = () => {
+    setShowModal((prev) => !prev);
+  }
   return (
     <div className="min-h-screen bg-background p-8 font-sans">
-      <div className="max-w-4xl mx-auto space-y-8">
+      <div
+        className={`mx-auto max-w-4xl space-y-8 transition ${showModal ? "pointer-events-none select-none blur-sm" : ""}`}
+      >
         <header className="flex items-center justify-between pb-6 border-b">
           <div>
             <h1 className="text-3xl font-bold tracking-tight text-foreground">Dashboard</h1>
@@ -66,7 +73,7 @@ export const Dashboard = () => {
                 <CardTitle>Your Habits</CardTitle>
                 <CardDescription>Track your daily progress.</CardDescription>
               </div>
-              <Button size="icon" variant="ghost" className="h-8 w-8 rounded-full">
+              <Button size="icon" variant="ghost" className="h-8 w-8 rounded-full" onClick={toggleHabitModal}>
                 <Plus className="h-4 w-4" />
               </Button>
             </CardHeader>
@@ -93,12 +100,13 @@ export const Dashboard = () => {
               ) : (
                 <div className="flex flex-col items-center justify-center p-8 text-center border-2 border-dashed rounded-lg bg-muted/20 border-border/60">
                   <p className="text-sm text-muted-foreground mb-4">You haven't created any habits yet.</p>
-                  <Button variant="secondary" size="sm">Create First Habit</Button>
+                  <Button variant="secondary" size="sm" onClick={toggleHabitModal}>
+                    Create First Habit
+                  </Button>
                 </div>
               )}
             </CardContent>
           </Card>
-          
           <Card className="border-border/40 shadow-sm">
             <CardHeader>
               <CardTitle>Overview</CardTitle>
@@ -117,6 +125,7 @@ export const Dashboard = () => {
           </Card>
         </main>
       </div>
+      {showModal && <Modal onClose={toggleHabitModal} />}
     </div>
   );
 };
