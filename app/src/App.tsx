@@ -4,6 +4,7 @@ import { Login } from "./pages/Login";
 import { Signup } from "./pages/Signup";
 import { Dashboard } from "./pages/Dashboard";
 import { AuthProvider, useAuth } from "./context/AuthContext";
+import { Toaster } from "@/components/ui/sonner";
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useAuth();
@@ -34,6 +35,7 @@ const App = () => {
           <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
+        <Toaster position="top-right" />
       </Router>
     </AuthProvider>
   )

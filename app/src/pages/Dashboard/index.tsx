@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import { habitService } from "@/services/habit.service";
 import type { Habit } from "@/services/habit.service";
 import Modal from "@/components/common/Modal";
+import HabitForm from "@/features/habits/components/HabitForm";
 
 export const Dashboard = () => {
   const { user, logout } = useAuth();
@@ -125,7 +126,7 @@ export const Dashboard = () => {
           </Card>
         </main>
       </div>
-      {showModal && <Modal onClose={toggleHabitModal} />}
+      {showModal && <Modal onClose={toggleHabitModal} children={<HabitForm />} />}
     </div>
   );
 };
