@@ -7,8 +7,19 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { ChevronDown } from "lucide-react";
 import { toast } from "sonner";
+import {api} from "@/lib/api";
+import type { Habit } from "@/types/habit";
 
 //? Habit Create Input Schema from frontend:  { title, description, frequency, startDate }
+/*
+? API Endpoints for Habits: 
+* habitRoutes.post("/", verifyToken, createHabit);
+* habitRoutes.get("/", verifyToken, getAllHabits);
+* habitRoutes.put("/:id", verifyToken, updateHabit);
+* habitRoutes.delete("/:id", verifyToken, deleteHabit);
+* habitRoutes.get("/:id", verifyToken, getHabit);
+* habitRoutes.post("/:id/checkin", verifyToken, habitCheckin);
+*/
 
 const HabitForm = () => {
   const [title,setTitle] = useState("");
@@ -20,7 +31,19 @@ const HabitForm = () => {
     ? `${frequency.charAt(0).toUpperCase()}${frequency.slice(1)}`
     : "Select Frequency";
 
-  const handleSubmit = (e: React.FormEvent) => {
+  type CreateHabitPayload = {
+    title: string;
+    description: string;
+    frequency: string;
+    startDate: string;
+  };
+
+  type CreateHabitResponse = {
+    success: boolean;
+    data: Habit;
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     //? Validate form data and show error in a toast if any field is missing
     if (!title || !description || !frequency) {
@@ -28,6 +51,27 @@ const HabitForm = () => {
       return;
     }
     // TODO:Call API to create habit with the form data
+    try{
+      const response = await api.post<CreateHabitResponse, CreateHabitPayload>("/habits", {
+        title,
+        description,
+        frequency: frequency.toUpperCase(),
+        startDate: startDate.toISOString(),
+      });
+      if (response.success) {
+        toast.success(`Habit created: ${response.data.title}`);
+      }
+    }
+    catch(error){
+      toast.error(`
+        Error during habit creation: ${(error as Error).message}` || "An error occurred while creating the habit");
+      return;
+    }
+
+    setTitle("");
+    setDescription("");
+    setFrequency("");
+    setStartDate(new Date());
     console.log({title, description, frequency, startDate});
   }
 

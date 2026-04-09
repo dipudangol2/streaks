@@ -1,5 +1,10 @@
 import { api } from "../lib/api";
 
+interface ApiSuccess<T> {
+  success: boolean;
+  data: T;
+}
+
 export interface Habit {
   id: string;
   title: string;
@@ -20,27 +25,27 @@ export interface HabitInput {
 }
 
 export const habitService = {
-  getAll: async (): Promise<{ success: boolean; data: Habit[] }> => {
-    return api.get("/habits");
+  getAll: async (): Promise<ApiSuccess<Habit[]>> => {
+    return api.get<ApiSuccess<Habit[]>>("/habits");
   },
 
-  getById: async (id: string): Promise<{ success: boolean; data: Habit }> => {
-    return api.get(`/habits/${id}`);
+  getById: async (id: string): Promise<ApiSuccess<Habit>> => {
+    return api.get<ApiSuccess<Habit>>(`/habits/${id}`);
   },
 
-  create: async (habit: HabitInput): Promise<{ success: boolean; data: Habit }> => {
-    return api.post("/habits", habit);
+  create: async (habit: HabitInput): Promise<ApiSuccess<Habit>> => {
+    return api.post<ApiSuccess<Habit>, HabitInput>("/habits", habit);
   },
 
-  update: async (id: string, habit: Partial<HabitInput>): Promise<{ success: boolean; data: Habit; message?: string }> => {
-    return api.patch(`/habits/${id}`, habit); // Note: server uses PUT, but let's confirm.
+  update: async (id: string, habit: Partial<HabitInput>): Promise<Habit | { message: string; habit: Habit }> => {
+    return api.put<Habit | { message: string; habit: Habit }, Partial<HabitInput>>(`/habits/${id}`, habit);
   },
 
   delete: async (id: string): Promise<void> => {
-    await api.post(`/habits/${id}`, { method: "DELETE" }); // This is a workaround if I don't have delete in api.ts
+    await api.delete<void>(`/habits/${id}`);
   },
 
-  checkin: async (id: string): Promise<{ success: boolean; data: any }> => {
-    return api.post(`/habits/${id}/checkin`, {});
+  checkin: async (id: string): Promise<ApiSuccess<unknown>> => {
+    return api.post<ApiSuccess<unknown>, Record<string, never>>(`/habits/${id}/checkin`, {});
   }
 };
