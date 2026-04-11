@@ -4,6 +4,11 @@
 // Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
+enum FREQUENCY {
+  DAILY
+  WEEKLY
+  MONTHLY
+}
 generator client {
   provider = "prisma-client-js"
   // output = "../generated/prisma"
@@ -28,7 +33,7 @@ model Habit {
   id          String         @id @default(uuid())
   title       String
   description String?
-  frequency   String // e.g. "daily", "weekly"
+  frequency   FREQUENCY      @default(DAILY)
   startDate   DateTime
   archived    Boolean        @default(false)
   userId      String
@@ -37,6 +42,8 @@ model Habit {
   streak      Streak?
   createdAt   DateTime       @default(now())
   updatedAt   DateTime       @updatedAt
+
+  // @@unique([userId,title,description,startDate,frequency]) // Ensure a user cannot have two habits with the same details
 }
 
 model HabitCheckin {
