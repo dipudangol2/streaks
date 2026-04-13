@@ -58,8 +58,8 @@ model HabitCheckin {
 model Streak {
   id              String    @id @default(uuid())
   habitId         String    @unique
-  currentCount    Int       @default(0)
-  longestCount    Int       @default(0)
+  currentCount    Int       @default(1)
+  longestCount    Int       @default(1)
   lastCheckinDate DateTime?
   habit           Habit     @relation(fields: [habitId], references: [id])
 }
