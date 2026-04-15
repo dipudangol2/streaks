@@ -9,6 +9,7 @@ enum FREQUENCY {
   WEEKLY
   MONTHLY
 }
+
 generator client {
   provider = "prisma-client-js"
   // output = "../generated/prisma"
@@ -38,7 +39,7 @@ model Habit {
   archived    Boolean        @default(false)
   userId      String
   user        User           @relation("UserHabits", fields: [userId], references: [id])
-  checkins    HabitCheckin[]
+  checkins    HabitCheckin[] //References the habit's checkins for joins later
   streak      Streak?
   createdAt   DateTime       @default(now())
   updatedAt   DateTime       @updatedAt

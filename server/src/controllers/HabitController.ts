@@ -4,10 +4,61 @@ import {
   HabitUpdateInput,
   streakInput,
 } from "../interfaces/types";
-import { fetchAllHabits, habitCreate } from "../models/habit.model";
+import { fetchAllHabits, habitCreate, fetchSingleHabit } from "../models/habit.model";
 import prisma from "../config/db";
 import { Prisma } from "@prisma/client";
 import { isNextDay } from "../utils/utils";
+/*
+
+
+
+
+
+INFO:
+* habit with checkin response
+* ```
+{
+  "success": true,
+  "data": [
+    {
+      "id": "acaa3056-276c-471b-abfe-bbcc155e0ba6",
+      "title": "test",
+      "description": "test",
+      "frequency": "DAILY",
+      "startDate": "2026-04-13T11:05:14.197Z",
+      "archived": false,
+      "userId": "438d0676-94cb-4cda-b376-f3523bf411d2",
+      "createdAt": "2026-04-13T11:05:20.036Z",
+      "updatedAt": "2026-04-13T11:05:20.036Z",
+      "checkins": [
+        {
+          "id": "9350a9d5-755e-4f5a-a1c7-6fb36c13c7af",
+          "habitId": "acaa3056-276c-471b-abfe-bbcc155e0ba6",
+          "date": "2026-04-15T11:34:41.608Z"
+        }
+      ]
+    }
+  ]
+}
+* ```
+*/
+
+interface HabitWithCheckins {
+  id: string;
+  title: string;
+  description: string | null;
+  frequency: string;
+  startDate: Date;
+  userId: string;
+  archived: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+  checkins: Array<{
+    id: string;
+    habitId: string;
+    date: Date;
+  }>;
+}
 
 export const createHabit = async (
   request: Request,
@@ -47,7 +98,7 @@ export const getAllHabits = async (
 ) => {
   try {
     const userId = request.userId!;
-    const userHabits = await fetchAllHabits(userId);
+    const userHabits: HabitWithCheckins[] = await fetchAllHabits(userId);
     console.log(userHabits);
     response.status(200).json({
       success: true,
@@ -55,6 +106,48 @@ export const getAllHabits = async (
     });
   } catch (error) {
     console.error(error);
+    response.status(500).json({
+      success: false,
+      message: "Internal Server Error.",
+    });
+  }
+};
+
+export const getHabit = async (
+  request: Request,
+  response: Response,
+  next: NextFunction,
+) => {
+  const now = new Date();
+  const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const endOfDay = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    now.getDate(),
+    23,
+    59,
+    59,
+    999,
+  );
+
+  try {
+    const habitId = request.params.id;
+    const userId = request.userId!;
+    const habit : HabitWithCheckins | null = await fetchSingleHabit(userId, habitId);
+      if (!habit) {
+      response.status(400).json({
+        sucess: false,
+        message: "Habit Not Found",
+      });
+      return;
+    }
+
+    response.status(200).json({
+      success: true,
+      data: habit,
+    });
+  } catch (error) {
+    console.error("Error in updateHabit:", error);
     response.status(500).json({
       success: false,
       message: "Internal Server Error.",
@@ -182,42 +275,6 @@ export const deleteHabit = async (
   }
 };
 
-export const getHabit = async (
-  request: Request,
-  response: Response,
-  next: NextFunction,
-) => {
-  try {
-    const habitId = request.params.id;
-    const userId = request.userId!;
-    const habit = await prisma.habit.findUnique({
-      where: {
-        id: habitId,
-        userId,
-      },
-    });
-
-    if (!habit) {
-      response.status(400).json({
-        sucess: false,
-        message: "Habit Not Found",
-      });
-      return;
-    }
-
-    response.status(200).json({
-      success: true,
-      data: habit,
-    });
-  } catch (error) {
-    console.error("Error in updateHabit:", error);
-    response.status(500).json({
-      success: false,
-      message: "Internal Server Error.",
-    });
-  }
-};
-
 export const habitCheckin = async (request: Request, response: Response) => {
   try {
     const habitId = request.params.id;
@@ -312,7 +369,7 @@ export const habitCheckin = async (request: Request, response: Response) => {
     });
   } catch (error: any) {
     if (error.message.includes("USER_ALREADY_CHECKED_IN")) {
-    //? return response so that we don't send multiple responses in case of other errors
+      //? return response so that we don't send multiple responses in case of other errors
       return response.status(409).json({
         success: false,
         message: "Already checked in today",
