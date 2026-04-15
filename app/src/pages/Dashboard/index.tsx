@@ -11,26 +11,34 @@ import { LogOut, Plus, CheckCircle2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { habitService } from "@/services/habit.service";
-import type { Habit } from "@/services/habit.service";
+import type { HabitWithCheckins } from "@/types/habit";
 import Modal from "@/components/common/Modal";
 import HabitForm from "@/features/habits/components/HabitForm";
-import { useQuery, useMutation, QueryClient } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import HabitInfo from "@/features/habits/components/HabitInfo";
+
+// * NOTE: To toggle the modal with form/edit data when clicked on either create habit or the habit card
+type ModalState =
+  | { type: "create" }
+  | { type: "edit"; habit: HabitWithCheckins }
+  | null;
 
 export const Dashboard = () => {
   const { user, logout } = useAuth();
-  const [showModal, setShowModal] = useState(false);
+  const [modalState, setModalState] = useState<ModalState>(null);
+
   const navigate = useNavigate();
 
-  const queryClient = new QueryClient();
   //? use react-query to fetch habits and manage loading state and cache
+  const queryClient = useQueryClient();
   const { data, isLoading, error } = useQuery({
     queryKey: ["habits"],
     queryFn: habitService.getAll,
     retry: 1,
   });
   //? Assign habits from data or set to empty array if data is undefined
-  const habits: Habit[] = data?.data || [];
+  const habits: HabitWithCheckins[] = data?.data || [];
 
   //? Show error toast if there was an error fetching habits
   useEffect(() => {
@@ -55,13 +63,10 @@ export const Dashboard = () => {
   });
 
   //? Handle habit check-in by calling the mutation with the habit ID
-  const handleCheckin = async (id: string) => {
+  const handleCheckin = async (e, id: string) => {
+    e.stopPropagation(); // Prevent card click event
     console.log("Check-in for habit ID:", id);
     checkinMutation.mutate(id);
-  };
-
-  const toggleHabitModal = () => {
-    setShowModal((prev) => !prev);
   };
 
   const handleLogout = async () => {
@@ -71,7 +76,7 @@ export const Dashboard = () => {
   return (
     <div className="min-h-screen bg-background p-8 font-sans">
       <div
-        className={`mx-auto max-w-4xl space-y-8 transition ${showModal ? "pointer-events-none select-none blur-sm" : ""}`}
+        className={`mx-auto max-w-4xl space-y-8 transition ${modalState !== null ? "pointer-events-none select-none blur-sm" : ""}`}
       >
         <header className="flex items-center justify-between pb-6 border-b">
           <div>
@@ -99,7 +104,7 @@ export const Dashboard = () => {
                 size="icon"
                 variant="ghost"
                 className="h-8 w-8 rounded-full"
-                onClick={toggleHabitModal}
+                onClick={() => setModalState({ type: "create" })}
               >
                 <Plus className="h-4 w-4" />
               </Button>
@@ -116,6 +121,9 @@ export const Dashboard = () => {
                     <div
                       key={habit.id}
                       className="flex items-center justify-between p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors"
+                      onClick={() =>
+                        setModalState({ type: "edit", habit: { ...habit } })
+                      }
                     >
                       <div className="space-y-1">
                         <p className="text-sm font-medium leading-none">
@@ -126,11 +134,12 @@ export const Dashboard = () => {
                         </p>
                       </div>
                       <Button
-                        size="lg"
                         variant="ghost"
-                        onClick={() => handleCheckin(habit.id)}
+                        onClick={(e) => handleCheckin(e, habit.id)}
                       >
-                        <CheckCircle2 className="h-4 w-4 text-muted-foreground hover:text-primary transition-colors" />
+                        <CheckCircle2
+                          className={`h-5 w-5 rounded-full border-transparent ${habit.checkins.some(() => true) ? "fill-green-600 text-white" : "text-muted-foreground hover:text-primary"} transition-colors`}
+                        />
                       </Button>
                     </div>
                   ))}
@@ -143,7 +152,7 @@ export const Dashboard = () => {
                   <Button
                     variant="secondary"
                     size="sm"
-                    onClick={toggleHabitModal}
+                    onClick={() => setModalState({ type: "create" })}
                   >
                     Create First Habit
                   </Button>
@@ -169,8 +178,17 @@ export const Dashboard = () => {
           </Card>
         </main>
       </div>
-      {showModal && (
-        <Modal onClose={toggleHabitModal} children={<HabitForm />} />
+      {modalState && (
+        <Modal onClose={() => setModalState(null)}>
+          {modalState.type === "create" ? (
+            <HabitForm onSuccess={() => setModalState(null)} />
+          ) : (
+            <HabitInfo
+              habit={modalState.habit}
+              onSuccess={() => setModalState(null)}
+            />
+          )}
+        </Modal>
       )}
     </div>
   );

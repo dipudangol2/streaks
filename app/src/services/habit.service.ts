@@ -1,20 +1,9 @@
 import { api } from "../lib/api";
+import type { Habit, HabitWithCheckins } from "../types/habit"
 
 interface ApiSuccess<T> {
   success: boolean;
   data: T;
-}
-
-export interface Habit {
-  id: string;
-  title: string;
-  description?: string;
-  frequency: string;
-  startDate: string;
-  archived: boolean;
-  userId: string;
-  createdAt: string;
-  updatedAt: string;
 }
 
 export interface HabitInput {
@@ -25,12 +14,12 @@ export interface HabitInput {
 }
 
 export const habitService = {
-  getAll: async (): Promise<ApiSuccess<Habit[]>> => {
-    return api.get<ApiSuccess<Habit[]>>("/habits");
+  getAll: async (): Promise<ApiSuccess<HabitWithCheckins[]>> => {
+    return api.get<ApiSuccess<HabitWithCheckins[]>>("/habits");
   },
 
-  getById: async (id: string): Promise<ApiSuccess<Habit>> => {
-    return api.get<ApiSuccess<Habit>>(`/habits/${id}`);
+  getById: async (id: string): Promise<ApiSuccess<HabitWithCheckins>> => {
+    return api.get<ApiSuccess<HabitWithCheckins>>(`/habits/${id}`);
   },
 
   create: async (habit: HabitInput): Promise<ApiSuccess<Habit>> => {
