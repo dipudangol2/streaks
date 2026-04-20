@@ -2,8 +2,17 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { useAuth } from "@/context/AuthContext";
+import PasswordInput from "@/components/common/PasswordInput";
+import { toast } from "sonner";
 
 export const Login = () => {
   const [email, setEmail] = useState("");
@@ -22,6 +31,7 @@ export const Login = () => {
       navigate("/dashboard");
     } catch (err: any) {
       setError(err.message || "Failed to login");
+      toast.error(err.message);
     } finally {
       setLoading(false);
     }
@@ -32,13 +42,19 @@ export const Login = () => {
       <Card className="w-full max-w-sm rounded-[var(--radius)]">
         <CardHeader className="text-center">
           <CardTitle className="text-2xl font-semibold">Welcome back</CardTitle>
-          <CardDescription>Enter your email below to login to your account.</CardDescription>
+          <CardDescription>
+            Enter your email below to login to your account.
+          </CardDescription>
         </CardHeader>
         <form onSubmit={handleLogin}>
           <CardContent className="space-y-4">
-            {error && <div className="text-sm font-medium text-destructive text-center">{error}</div>}
             <div className="space-y-2">
-              <label className="text-sm font-medium leading-none" htmlFor="email">Email</label>
+              <label
+                className="text-sm font-medium leading-none"
+                htmlFor="email"
+              >
+                Email
+              </label>
               <Input
                 id="email"
                 type="email"
@@ -49,18 +65,33 @@ export const Login = () => {
               />
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-medium leading-none" htmlFor="password">Password</label>
-              <Input
+              <label
+                className="text-sm font-medium leading-none"
+                htmlFor="password"
+              >
+                Password
+              </label>
+              <PasswordInput
+                id="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
+              {/*<Input
                 id="password"
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-              />
+              />*/}
             </div>
           </CardContent>
           <CardFooter className="flex flex-col space-y-4">
-            <Button type="submit" className="w-full rounded-[var(--radius)]" disabled={loading}>
+            <Button
+              type="submit"
+              className="w-full rounded-[var(--radius)]"
+              disabled={loading}
+            >
               {loading ? "Signing in..." : "Sign in"}
             </Button>
             <div className="text-sm text-center text-muted-foreground mt-4">
