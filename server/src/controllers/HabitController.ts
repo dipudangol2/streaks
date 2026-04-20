@@ -8,40 +8,6 @@ import { fetchAllHabits, habitCreate, fetchSingleHabit } from "../models/habit.m
 import prisma from "../config/db";
 import { Prisma } from "@prisma/client";
 import { isNextDay } from "../utils/utils";
-/*
-
-
-
-
-
-INFO:
-* habit with checkin response
-* ```
-{
-  "success": true,
-  "data": [
-    {
-      "id": "acaa3056-276c-471b-abfe-bbcc155e0ba6",
-      "title": "test",
-      "description": "test",
-      "frequency": "DAILY",
-      "startDate": "2026-04-13T11:05:14.197Z",
-      "archived": false,
-      "userId": "438d0676-94cb-4cda-b376-f3523bf411d2",
-      "createdAt": "2026-04-13T11:05:20.036Z",
-      "updatedAt": "2026-04-13T11:05:20.036Z",
-      "checkins": [
-        {
-          "id": "9350a9d5-755e-4f5a-a1c7-6fb36c13c7af",
-          "habitId": "acaa3056-276c-471b-abfe-bbcc155e0ba6",
-          "date": "2026-04-15T11:34:41.608Z"
-        }
-      ]
-    }
-  ]
-}
-* ```
-*/
 
 interface HabitWithCheckins {
   id: string;
@@ -163,7 +129,7 @@ export const updateHabit = async (
   try {
     const habitId = request.params.id;
     const userId = request.userId!;
-    const incomingUpdates: HabitUpdateInput = request.body;
+    const { title, description, frequency }: HabitUpdateInput = request.body;
 
     const existingHabit = await prisma.habit.findUnique({
       where: {
@@ -180,22 +146,14 @@ export const updateHabit = async (
       return;
     }
     const changes: HabitUpdateInput = {};
-    for (const key in incomingUpdates) {
-      const typedKey = key as keyof HabitUpdateInput;
-      const value = incomingUpdates[typedKey];
-      if (
-        typedKey === "description" &&
-        value !== undefined &&
-        value !== existingHabit[typedKey]
-      ) {
-        changes[typedKey] = value as string | null;
-      } else if (
-        (typedKey === "title" || typedKey === "frequency") &&
-        typeof value === "string" &&
-        value !== existingHabit[typedKey]
-      ) {
-        changes[typedKey] = value;
-      }
+    if (title && title != existingHabit.title) {
+      changes.title = title;
+    }
+    if (description && description != existingHabit.description) {
+      changes.description = description;
+    }
+    if (frequency && frequency != existingHabit.frequency) {
+      changes.frequency = frequency;
     }
 
     if (Object.keys(changes).length === 0) {
