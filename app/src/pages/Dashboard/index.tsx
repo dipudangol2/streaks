@@ -69,6 +69,37 @@ export const Dashboard = () => {
     checkinMutation.mutate(id);
   };
 
+  const longestCheckin = {
+    getLongestName: (habits: HabitWithCheckins[]): string => {
+      const habitWithStreaks = habits.filter(
+        (habit) => habit.streak && habit.streak?.longestCount > 0,
+      );
+      if (habitWithStreaks.length <= 0) {
+        return "No Habits";
+      }
+      const topHabit = habitWithStreaks.reduce((prev, curr) => {
+        return curr.streak!.longestCount > prev.streak!.currentCount
+          ? curr
+          : prev;
+      });
+      return topHabit.title;
+    },
+    getLongestStreak: (habits: HabitWithCheckins[]): number => {
+      const habitWithStreaks = habits.filter(
+        (habit) => habit.streak && habit.streak.longestCount > 0,
+      );
+      if (habitWithStreaks.length <= 0) {
+        return 0;
+      }
+      const topHabit = habitWithStreaks.reduce((prev, curr) => {
+        return curr.streak!.longestCount > prev.streak!.currentCount
+          ? curr
+          : prev;
+      });
+      return topHabit.streak!.longestCount;
+    },
+  };
+
   const handleLogout = async () => {
     await logout();
     navigate("/");
@@ -133,14 +164,21 @@ export const Dashboard = () => {
                           {habit.frequency}
                         </p>
                       </div>
-                      <Button
-                        variant="ghost"
-                        onClick={(e) => handleCheckin(e, habit.id)}
-                      >
-                        <CheckCircle2
-                          className={`h-5 w-5 rounded-full border-transparent ${habit.checkins.some(() => true) ? "fill-green-600 text-white" : "text-muted-foreground hover:text-primary"} transition-colors`}
-                        />
-                      </Button>
+                      <div className="flex justify-center items-center">
+                        <span className=" px-2  text-xs border rounded-full border-gray-800 ">
+                          {habit.streak?.currentCount !== undefined
+                            ? `${habit.streak.currentCount}`
+                            : 0}
+                        </span>
+                        <Button
+                          variant="ghost"
+                          onClick={(e) => handleCheckin(e, habit.id)}
+                        >
+                          <CheckCircle2
+                            className={`h-5 w-5 rounded-full border-transparent ${habit.checkins.some(() => true) ? "fill-green-600 text-white" : "text-muted-foreground hover:text-primary"} transition-colors`}
+                          />
+                        </Button>
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -167,8 +205,12 @@ export const Dashboard = () => {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex items-center justify-between p-4 rounded-xl bg-muted/40 transition-all hover:bg-muted/60">
-                <span className="font-medium text-sm">Longest Streak</span>
-                <span className="font-bold text-2xl font-mono">0</span>
+                <span className="font-medium text-sm">
+                  Longest Streak({longestCheckin.getLongestName(habits)})
+                </span>
+                <span className="font-bold text-2xl font-mono">
+                  {longestCheckin.getLongestStreak(habits)}
+                </span>
               </div>
               <div className="flex items-center justify-between p-4 rounded-xl bg-muted/40 transition-all hover:bg-muted/60">
                 <span className="font-medium text-sm">Total Check-ins</span>
@@ -181,7 +223,12 @@ export const Dashboard = () => {
       {modalState && (
         <Modal onClose={() => setModalState(null)}>
           {modalState.type === "create" ? (
-            <HabitForm onSuccess={() => setModalState(null)} />
+            <HabitForm
+              onSuccess={() => {
+                setModalState(null);
+                queryClient.invalidateQueries({ queryKey: ["habits"] });
+              }}
+            />
           ) : (
             <HabitInfo
               habit={modalState.habit}
