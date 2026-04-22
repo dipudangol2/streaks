@@ -24,6 +24,10 @@ type ModalState =
   | { type: "edit"; habit: HabitWithCheckins }
   | null;
 
+const modalTitles = {
+  create: "Create a New Habit",
+  edit:"Habit Details"
+}
 export const Dashboard = () => {
   const { user, logout } = useAuth();
   const [modalState, setModalState] = useState<ModalState>(null);
@@ -36,6 +40,7 @@ export const Dashboard = () => {
     queryKey: ["habits"],
     queryFn: habitService.getAll,
     retry: 1,
+    staleTime: 15 * 60 * 1000, //Data is not considered stale for 15 minutes
   });
   //? Assign habits from data or set to empty array if data is undefined
   const habits: HabitWithCheckins[] = data?.data || [];
@@ -63,7 +68,7 @@ export const Dashboard = () => {
   });
 
   //? Handle habit check-in by calling the mutation with the habit ID
-  const handleCheckin = async (e, id: string) => {
+  const handleCheckin = async (e: React.FormEvent, id: string) => {
     e.stopPropagation(); // Prevent card click event
     console.log("Check-in for habit ID:", id);
     checkinMutation.mutate(id);
@@ -221,7 +226,7 @@ export const Dashboard = () => {
         </main>
       </div>
       {modalState && (
-        <Modal onClose={() => setModalState(null)}>
+        <Modal onClose={() => setModalState(null)} title={modalTitles[modalState.type]}>
           {modalState.type === "create" ? (
             <HabitForm
               onSuccess={() => {

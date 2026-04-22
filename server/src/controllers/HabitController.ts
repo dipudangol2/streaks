@@ -4,7 +4,11 @@ import {
   HabitUpdateInput,
   streakInput,
 } from "../interfaces/types";
-import { fetchAllHabits, habitCreate, fetchSingleHabit } from "../models/habit.model";
+import {
+  fetchAllHabits,
+  habitCreate,
+  fetchSingleHabit,
+} from "../models/habit.model";
 import prisma from "../config/db";
 import { Prisma } from "@prisma/client";
 import { isNextDay } from "../utils/utils";
@@ -65,7 +69,7 @@ export const getAllHabits = async (
   try {
     const userId = request.userId!;
     const userHabits: HabitWithCheckins[] = await fetchAllHabits(userId);
-    console.log(userHabits);
+    console.log(`Habit fetched`);
     response.status(200).json({
       success: true,
       data: userHabits,
@@ -99,8 +103,11 @@ export const getHabit = async (
   try {
     const habitId = request.params.id;
     const userId = request.userId!;
-    const habit : HabitWithCheckins | null = await fetchSingleHabit(userId, habitId);
-      if (!habit) {
+    const habit: HabitWithCheckins | null = await fetchSingleHabit(
+      userId,
+      habitId,
+    );
+    if (!habit) {
       response.status(400).json({
         sucess: false,
         message: "Habit Not Found",

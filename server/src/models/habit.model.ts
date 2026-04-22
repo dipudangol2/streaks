@@ -19,23 +19,24 @@ export const habitCreate = async (data: HabitInput) => {
 
 export const fetchSingleHabit = async (userId: string, habitId: string) => {
   return await prisma.habit.findUnique({
+    where: {
+      id: habitId,
+      userId,
+    },
+    include: {
+      checkins: {
         where: {
-          id: habitId,
-          userId,
+          date: {
+            gte: startOfDay,
+            lte: endOfDay,
+          },
         },
-        include: {
-              checkins: {
-                where: {
-                  date: {
-                    gte: startOfDay,
-                    lte: endOfDay,
-                  },
-                },
-                take: 1,
-              },
-            },
-      });
-}
+        take: 1,
+      },
+      streak: true,
+    },
+  });
+};
 export const fetchAllHabits = async (userId: string) => {
   return await prisma.habit.findMany({
     where: { userId: userId },
@@ -49,7 +50,7 @@ export const fetchAllHabits = async (userId: string) => {
         },
         take: 1,
       },
+      streak: true,
     },
   });
 };
-
