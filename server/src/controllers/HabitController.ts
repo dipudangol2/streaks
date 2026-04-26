@@ -120,7 +120,7 @@ export const getHabit = async (
       data: habit,
     });
   } catch (error) {
-    console.error("Error in updateHabit:", error);
+    console.error("Error in getHabit:", error);
     response.status(500).json({
       success: false,
       message: "Internal Server Error.",
