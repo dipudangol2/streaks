@@ -26,8 +26,8 @@ type ModalState =
 
 const modalTitles = {
   create: "Create a New Habit",
-  edit:"Habit Details"
-}
+  edit: "Habit Details",
+};
 export const Dashboard = () => {
   const { user, logout } = useAuth();
   const [modalState, setModalState] = useState<ModalState>(null);
@@ -103,6 +103,19 @@ export const Dashboard = () => {
       });
       return topHabit.streak!.longestCount;
     },
+  };
+
+  /* 
+  WIP: Calculate total checkins for the user for all habits combined.
+  Currently the checkins array would only have the checkin for the current day so the count is same as number of checkedin habits.
+  Need to implement an totalcheckin endpoint for the current user and get the count from the backend to display in the Dashboard
+  */
+  const calculateTotalCheckins = (): number => {
+    let totalCheckins: number = 0;
+    habits.forEach((habit) => {
+      totalCheckins += habit.checkins.length;
+    });
+    return totalCheckins;
   };
 
   const handleLogout = async () => {
@@ -219,14 +232,17 @@ export const Dashboard = () => {
               </div>
               <div className="flex items-center justify-between p-4 rounded-xl bg-muted/40 transition-all hover:bg-muted/60">
                 <span className="font-medium text-sm">Total Check-ins</span>
-                <span className="font-bold text-2xl font-mono">0</span>
+                <span className="font-bold text-2xl font-mono">{calculateTotalCheckins()}</span>
               </div>
             </CardContent>
           </Card>
         </main>
       </div>
       {modalState && (
-        <Modal onClose={() => setModalState(null)} title={modalTitles[modalState.type]}>
+        <Modal
+          onClose={() => setModalState(null)}
+          title={modalTitles[modalState.type]}
+        >
           {modalState.type === "create" ? (
             <HabitForm
               onSuccess={() => {

@@ -109,6 +109,14 @@ const EditField = ({
   );
 };
 
+/*
+TODO:
+  - Add a streak counter for the clicked habit
+  - Add a longest streak for the habit
+  - Allow checkin from the details if not already checked in from the dashboard
+  - Enable frequency editing once Weekly/Monthly check-in logic is implemented.
+    Currently restricted to 'daily' to prevent inconsistent streak calculations.
+*/
 const HabitInfo = ({
   habit,
   onSuccess,
