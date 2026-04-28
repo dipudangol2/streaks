@@ -23,7 +23,7 @@ COPY . .
 
 # Generate Prisma client
 # Use a dummy DB_URL since 'prisma generate' requires it for the config but doesn't need a live connection
-RUN DB_URL="postgresql://user:pass@localhost:5432/db" pnpm prisma generate
+RUN DB_URL="postgresql://user:pass@db:5432/db" pnpm prisma generate
 
 # Build TypeScript
 RUN pnpm run build

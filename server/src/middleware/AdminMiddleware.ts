@@ -1,5 +1,4 @@
 import { NextFunction, Request, Response } from "express";
-import prisma from "../config/db";
 
 export const isAdmin = async (request: Request, response: Response, next: NextFunction) => {
     try {

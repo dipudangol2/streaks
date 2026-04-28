@@ -11,7 +11,7 @@ import {
 } from "../models/habit.model";
 import prisma from "../config/db";
 import { Prisma } from "@prisma/client";
-import { isNextDay } from "../utils/utils";
+import { isNextDay, isSameDay } from "../utils/utils";
 
 interface HabitWithCheckins {
   id: string;
@@ -68,11 +68,24 @@ export const getAllHabits = async (
 ) => {
   try {
     const userId = request.userId!;
-    const userHabits: HabitWithCheckins[] = await fetchAllHabits(userId);
+    const userHabits: any[] = await fetchAllHabits(userId);
+
+    // Calculate live streak statuses based on current date
+    const now = new Date();
+    const mappedHabits = userHabits.map((habit) => {
+      if (habit.streak && habit.streak.lastCheckinDate) {
+        const lastCheckin = new Date(habit.streak.lastCheckinDate);
+        if (!isSameDay(lastCheckin, now) && !isNextDay(lastCheckin, now)) {
+          habit.streak.currentCount = 0;
+        }
+      }
+      return habit;
+    });
+
     console.log(`Habit fetched`);
     response.status(200).json({
       success: true,
-      data: userHabits,
+      data: mappedHabits,
     });
   } catch (error) {
     console.error(error);
@@ -103,7 +116,7 @@ export const getHabit = async (
   try {
     const habitId = request.params.id;
     const userId = request.userId!;
-    const habit: HabitWithCheckins | null = await fetchSingleHabit(
+    const habit: any | null = await fetchSingleHabit(
       userId,
       habitId,
     );
@@ -113,6 +126,13 @@ export const getHabit = async (
         message: "Habit Not Found",
       });
       return;
+    }
+
+    if (habit.streak && habit.streak.lastCheckinDate) {
+      const lastCheckin = new Date(habit.streak.lastCheckinDate);
+      if (!isSameDay(lastCheckin, now) && !isNextDay(lastCheckin, now)) {
+        habit.streak.currentCount = 0;
+      }
     }
 
     response.status(200).json({

@@ -6,7 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node dist/index.js",
-    "dev": "nodemon",
+    "dev": "tsx --env-file=.env --watch ./src/index.ts",
     "build": "tsc"
   },
   "keywords": [],
@@ -17,7 +17,6 @@
     "@prisma/client": "^7.0.0",
     "@prisma/config": "^7.0.0",
     "@prisma/engines": "7.0.0",
-    "@types/dotenv": "^8.2.3",
     "bcrypt": "^6.0.0",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
@@ -39,10 +38,9 @@
     "@types/pg": "^8.15.6",
     "@types/swagger-jsdoc": "^6.0.4",
     "@types/swagger-ui-express": "^4.1.8",
-    "dotenv": "^17.0.1",
-    "nodemon": "^3.1.11",
     "prisma": "^7.0.0",
     "ts-node": "^10.9.2",
+    "tsx": "^4.21.0",
     "typescript": "^5.9.3"
   },
   "packageManager": "pnpm@10.12.4+sha512.5ea8b0deed94ed68691c9bad4c955492705c5eeb8a87ef86bc62c74a26b037b08ff9570f108b2e4dbd1dd1a9186fea925e527f141c648e85af45631074680184"

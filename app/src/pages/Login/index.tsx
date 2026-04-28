@@ -31,7 +31,7 @@ export const Login = () => {
       navigate("/dashboard");
     } catch (err: any) {
       setError(err.message || "Failed to login");
-      toast.error(err.message);
+      toast.error(error);
     } finally {
       setLoading(false);
     }

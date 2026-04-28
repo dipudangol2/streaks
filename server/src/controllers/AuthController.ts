@@ -136,6 +136,9 @@ export const getCurrentUser = async (request: Request, response: Response, next:
         });
     } catch (error) {
         console.error(error);
+       if(error instanceof Error && error.message.includes("Jwt is not set")) {
+        return response.status(401).json({ success: false, message: "Unauthorized" });
+       }
         response.status(500).json({ success: false, message: "Internal Server Error" });
     }
 }
