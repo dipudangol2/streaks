@@ -45,7 +45,7 @@ jobs:
           cat << EOF > compose.yaml
           services:
             db:
-              image: postgres:17-alpine
+              image: docker.io/library/postgres:17-alpine
               container_name: streaks-db
               restart: unless-stopped
               environment:
@@ -61,7 +61,7 @@ jobs:
                 retries: 5
 
             server:
-              image: ghcr.io/${GITHUB_REPOSITORY}/streaks-server:latest
+              image: ghcr.io/${ github.repository}/streaks-server:latest
               container_name: streaks-server
               restart: unless-stopped
               env_file:
@@ -71,7 +71,7 @@ jobs:
                   condition: service_healthy
 
             app:
-              image: ghcr.io/${GITHUB_REPOSITORY}/streaks-app:latest
+              image: ghcr.io/${ github.repository }/streaks-app:latest
               container_name: streaks-app
               restart: unless-stopped
               ports:
