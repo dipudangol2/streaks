@@ -40,11 +40,12 @@ jobs:
         key: ${{ secrets.EC2_SSH_KEY }}
         script: | 
           cd ~/streaks
+          # get repo name
+          export REPO_NAME=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
           
           # create compose.yaml
           cat << EOF > compose.yaml
-          # get repo name
-          export REPO_NAME=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
+          
           services:
             db:
               image: docker.io/library/postgres:17-alpine
