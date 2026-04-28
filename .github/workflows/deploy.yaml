@@ -64,7 +64,7 @@ jobs:
                 retries: 5
 
             server:
-              image: ghcr.io/\${ REPO_NAME }/streaks-server:latest
+              image: ghcr.io/\${REPO_NAME}/streaks-server:latest
               container_name: streaks-server
               restart: unless-stopped
               env_file:
@@ -74,7 +74,7 @@ jobs:
                   condition: service_healthy
 
             app:
-              image: ghcr.io/\${ REPO_NAME }/streaks-app:latest
+              image: ghcr.io/\${REPO_NAME}/streaks-app:latest
               container_name: streaks-app
               restart: unless-stopped
               ports:
