@@ -1,0 +1,102 @@
+name: Build and deploy Streaks
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+
+      - name: Login to GHCR for image building
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{github.actor}} --password-stdin
+
+      - name: Build and push Server image
+        run: |
+          docker build -t ghcr.io/${{github.repository}}/streaks-server:latest ./server
+          docker push ghcr.io/${{github.repository}}/streaks-server:latest
+
+      - name: Build and push App image
+        run: |
+          docker build -t ghcr.io/${{github.repository}}/streaks-app:latest ./app
+          docker push ghcr.io/${{github.repository}}/streaks-app:latest
+
+  deploy:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    steps:
+     - name: Deploy to EC2 with SSH
+       uses: appleboy/ssh-action@v1.0.3
+       with:
+        host: ${{ secrets.EC2_HOST }}
+        username: ec2-user
+        key: ${{ secrets.EC2_SSH_KEY }}
+        script: | 
+          cd ~/streaks
+          
+          # create compose.yaml
+          cat << EOF > compose.yaml
+          services:
+            db:
+              image: postgres:17-alpine
+              container_name: streaks-db
+              restart: unless-stopped
+              environment:
+                POSTGRES_USER: \${DB_USER}
+                POSTGRES_PASSWORD: \${DB_PASSWORD}
+                POSTGRES_DB: \${DB_NAME}
+              volumes:
+                - pgdata:/var/lib/postgresql/data
+              healthcheck:
+                test: [ "CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}" ]
+                interval: 5s
+                timeout: 5s
+                retries: 5
+
+            server:
+              image: ghcr.io/${GITHUB_REPOSITORY}/streaks-server:latest
+              container_name: streaks-server
+              restart: unless-stopped
+              env_file:
+                - .env
+              depends_on:
+                db:
+                  condition: service_healthy
+
+            app:
+              image: ghcr.io/${GITHUB_REPOSITORY}/streaks-app:latest
+              container_name: streaks-app
+              restart: unless-stopped
+              ports:
+                - "80:80"
+              depends_on:
+                - server
+
+          volumes:
+            pgdata:
+          EOF
+
+          # login to ghcr on the instance
+          echo "${{ secrets.GHCR_PAT }}" | podman login ghcr.io -u ${{ github.actor }} --password-stdin 
+
+          # create the env file
+          cat << EOF > .env
+          PORT=${{ vars.PORT }} 
+          DB_USER=${{ vars.DB_USER }}
+          DB_NAME=${{ vars.DB_NAME }}
+          DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+          DB_URL=${{ secrets.DB_URL }}
+          JWT_KEY=${{ secrets.JWT_KEY }}
+          NODE_ENV=production
+          EOF
+          
+          podman-compose pull
+          podman-compose down
+          podman-compose up -d
