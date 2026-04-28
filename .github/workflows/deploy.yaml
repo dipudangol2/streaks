@@ -43,6 +43,8 @@ jobs:
           
           # create compose.yaml
           cat << EOF > compose.yaml
+          # get repo name
+          export REPO_NAME=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
           services:
             db:
               image: docker.io/library/postgres:17-alpine
@@ -61,7 +63,7 @@ jobs:
                 retries: 5
 
             server:
-              image: ghcr.io/${ github.repository}/streaks-server:latest
+              image: ghcr.io/\${ REPO_NAME }/streaks-server:latest
               container_name: streaks-server
               restart: unless-stopped
               env_file:
@@ -71,7 +73,7 @@ jobs:
                   condition: service_healthy
 
             app:
-              image: ghcr.io/${ github.repository }/streaks-app:latest
+              image: ghcr.io/\${ REPO_NAME }/streaks-app:latest
               container_name: streaks-app
               restart: unless-stopped
               ports:
