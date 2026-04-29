@@ -54,11 +54,8 @@ jobs:
                 POSTGRES_DB: \${DB_NAME}
               volumes:
                 - pgdata:/var/lib/postgresql/data
-              healthcheck:
-                test: [ "CMD-SHELL", "pg_isready -U \${DB_USER} -d \${DB_NAME}" ]
-                interval: 5s
-                timeout: 5s
-                retries: 5
+              networks:
+                - streaks-net
 
             server:
               image: ghcr.io/dipudangol2/streaks/streaks-server:latest
@@ -69,6 +66,8 @@ jobs:
               depends_on:
                 db:
                   condition: service_healthy
+              networks:
+                - streaks-net
 
             app:
               image: ghcr.io/dipudangol2/streaks/streaks-app:latest
@@ -78,9 +77,14 @@ jobs:
                 - "80:80"
               depends_on:
                 - server
+              networks:
+                - streaks-net
 
           volumes:
             pgdata:
+          networks:
+            streaks-net:
+              driver: bridge
           EOF
 
           # login to ghcr on the instance
