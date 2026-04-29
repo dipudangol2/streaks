@@ -100,3 +100,14 @@ jobs:
           podman-compose pull
           podman-compose down
           podman-compose up -d
+          podman healthcheck run streaks-db
+          
+          # wait for containers to stabilise
+          sleep 15
+
+          # verify all three are running
+          podman ps --filter "name=streaks-db" --filter "status=running" | grep streaks-db || exit 1
+          podman ps --filter "name=streaks-server" --filter "status=running" | grep streaks-server || exit 1
+          podman ps --filter "name=streaks-app" --filter "status=running" | grep streaks-app || exit 1
+
+          echo "All containers running successfully"
