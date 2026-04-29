@@ -45,4 +45,4 @@ COPY --from=builder /app/package.json ./
 EXPOSE 8000
 USER node
 
-CMD ["node", "dist/index.js"]
+CMD ["sh", "-c", "node node_modules/.bin/prisma migrate deploy && node dist/index.js"]

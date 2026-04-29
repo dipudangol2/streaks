@@ -40,9 +40,6 @@ jobs:
         key: ${{ secrets.EC2_SSH_KEY }}
         script: | 
           cd ~/streaks
-          # get repo name
-          export REPO_NAME=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
-          
           # create compose.yaml
           cat << EOF > compose.yaml
           
@@ -58,13 +55,13 @@ jobs:
               volumes:
                 - pgdata:/var/lib/postgresql/data
               healthcheck:
-                test: [ "CMD-SHELL", "pg_isready -U dipudangol -d streaks" ]
+                test: [ "CMD-SHELL", "pg_isready -U \${DB_USER} -d ${DB_NAME}" ]
                 interval: 5s
                 timeout: 5s
                 retries: 5
 
             server:
-              image: ghcr.io/\${REPO_NAME}/streaks-server:latest
+              image: ghcr.io/dipudangol2/streaks/streaks-server:latest
               container_name: streaks-server
               restart: unless-stopped
               env_file:
@@ -74,7 +71,7 @@ jobs:
                   condition: service_healthy
 
             app:
-              image: ghcr.io/\${REPO_NAME}/streaks-app:latest
+              image: ghcr.io/dipudangol2/streaks/streaks-app:latest
               container_name: streaks-app
               restart: unless-stopped
               ports:

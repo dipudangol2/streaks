@@ -7,8 +7,6 @@ services:
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_DB: ${DB_NAME}
-    ports:
-      - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
@@ -18,27 +16,21 @@ services:
       retries: 5
 
   server:
-    image: localhost/streaks-server:latest
+    image: ghcr.io/${GITHUB_REPOSITORY}/streaks-server:latest
     container_name: streaks-server
     restart: unless-stopped
-    build: ./server
-    ports:
-      - "8000:8000"
     env_file:
-      - ./server/.env
+      - .env
     depends_on:
       db:
         condition: service_healthy
 
   app:
-    image: localhost/streaks-app:latest
+    image: ghcr.io/${GITHUB_REPOSITORY}/streaks-app:latest
     container_name: streaks-app
     restart: unless-stopped
-    build: ./app
-    env_file:
-      - ./app/.env
     ports:
-      - "3000:80"
+      - "80:80"
     depends_on:
       - server
 
