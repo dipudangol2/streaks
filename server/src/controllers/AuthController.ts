@@ -76,7 +76,8 @@ export const login = async (request: Request, response: Response, next: NextFunc
             maxAge: MAX_AGE,
             secure: process.env.NODE_ENV === "production",
             sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-            httpOnly: true
+            httpOnly: true,
+            path:"/"
         })
 
         response.status(200).json({
