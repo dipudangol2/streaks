@@ -38,7 +38,8 @@ jobs:
         host: ${{ secrets.EC2_HOST }}
         username: ec2-user
         key: ${{ secrets.EC2_SSH_KEY }}
-        script: | 
+        script: |
+          mkdir -p ~/streaks
           cd ~/streaks
           # create compose.yaml
           cat << EOF > compose.yaml
@@ -64,8 +65,7 @@ jobs:
               env_file:
                 - .env
               depends_on:
-                db:
-                  condition: service_healthy
+                - db
               networks:
                 - streaks-net
 
@@ -104,7 +104,6 @@ jobs:
           podman-compose pull
           podman-compose down
           podman-compose up -d
-          podman healthcheck run streaks-db
           
           # wait for containers to stabilise
           sleep 15
