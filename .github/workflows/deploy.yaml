@@ -65,6 +65,8 @@ jobs:
               restart: unless-stopped
               env_file:
                 - .env
+              ports:
+                - "127.0.0.1:8000:8000"
               depends_on:
                 - db
               networks:
@@ -75,7 +77,7 @@ jobs:
               container_name: streaks-app
               restart: unless-stopped
               ports:
-                - "80:80"
+                - "127.0.0.1:3000:80"
               depends_on:
                 - server
               networks:
@@ -102,10 +104,12 @@ jobs:
           NODE_ENV=production
           CLIENT_URL=${{ vars.CLIENT_URL }}
           EOF
+
           
           podman-compose pull
           podman-compose down
           podman-compose up -d
+          sudo systemctl restart nginx
           
           # wait for containers to stabilise
           sleep 15
