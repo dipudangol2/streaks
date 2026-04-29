@@ -38,6 +38,7 @@ jobs:
         host: ${{ secrets.EC2_HOST }}
         username: ec2-user
         key: ${{ secrets.EC2_SSH_KEY }}
+        command_timeout: 5m
         script: |
           mkdir -p ~/streaks
           cd ~/streaks
@@ -99,6 +100,7 @@ jobs:
           DB_URL=${{ secrets.DB_URL }}
           JWT_KEY=${{ secrets.JWT_KEY }}
           NODE_ENV=production
+          CLIENT_URL=${{ vars.CLIENT_URL }}
           EOF
           
           podman-compose pull

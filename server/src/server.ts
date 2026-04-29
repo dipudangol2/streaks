@@ -6,14 +6,24 @@ import habitRoutes from "./routes/habitRoutes";
 import adminRoutes from "./routes/adminRoutes";
 import swagger from "./swagger/swagger";
 
-
 const app: Application = express();
+const allowedOrigins =
+  process.env.NODE_ENV === "production"
+    ? (process.env.CLIENT_URL ?? "").split(",")
+    : ["http://localhost:5173", "http://localhost:3000"];
 app.use(
-    cors({
-        origin: ["http://localhost:5173","http://localhost:3000"],
-        methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
-        credentials: true,
-    })
+  cors({
+    origin: (origin, callback) => {
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error(`CORS blocked: ${origin}`));
+      }
+    },
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
+    credentials: true,
+  }),
 );
 app.use(cookieParser());
 app.use(express.json());
@@ -21,8 +31,7 @@ app.use(express.json());
 app.use("/api/auth", authRoutes);
 app.use("/api/habits", habitRoutes);
 app.use("/api/admin", adminRoutes);
-app.use("/api/docs", swagger)
-
+app.use("/api/docs", swagger);
 
 /**
  * @swagger
@@ -47,21 +56,16 @@ app.use("/api/docs", swagger)
  *             schema:
  *               $ref: '#/components/schemas/ErrorResponse'
  */
-app.get("/api/health-check",
-    (request, response, next) => {
-        try {
-            response.status(200).send("API is running and healthy.");
-        }
-        catch (error) {
-            console.error("Api health check failed!");
-            response.status(500).json({
-                success: false,
-                message: "Internal Server Error"
-            })
-        }
-    })
-
-
-
+app.get("/api/health-check", (request, response, next) => {
+  try {
+    response.status(200).send("API is running and healthy.");
+  } catch (error) {
+    console.error("Api health check failed!");
+    response.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+    });
+  }
+});
 
 export default app;
